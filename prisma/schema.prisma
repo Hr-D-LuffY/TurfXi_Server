@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// --- Enums -------------------------------------------------------------
+
+enum Role {
+  NORMAL
+  PLAYER
+  TURF_OWNER
+  ADMIN
+}
+
+enum MembershipTier {
+  FREE
+  SILVER
+  GOLD
+}
+
+// --- Starter model -------------------------------------------------------
+// This is intentionally minimal. Build out the full schema together
+// (turfs, bookings, wallet, split-billing, teams, tournaments, etc.)
+// before splitting into individual feature branches, so nobody's models
+// conflict with each other later.
+
+model User {
+  id             String         @id @default(cuid())
+  email          String         @unique
+  password       String?
+  googleId       String?        @unique
+  name           String
+  role           Role           @default(NORMAL)
+  membershipTier MembershipTier @default(FREE)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@map("users")
+}
