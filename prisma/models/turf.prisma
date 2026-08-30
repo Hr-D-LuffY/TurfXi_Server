@@ -1,0 +1,95 @@
+model Turf {
+  id             String   @id @default(cuid())
+  ownerId        String
+  owner          User     @relation("TurfOwner", fields: [ownerId], references: [id])
+  name           String
+  description    String?
+  address        String
+  city           String
+  area           String
+  latitude       Float
+  longitude      Float
+  pricePerHour   Decimal  @db.Decimal(10, 2)
+  size           String?
+  surfaceType    String?
+  advancePercent Int      @default(30)
+  verified       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  photos           TurfPhoto[]
+  membersOnlySlots MembersOnlySlot[]
+  favorites        Favorite[]
+  ratings          TurfRating[]
+  reviews          Review[]
+  bookings         Booking[]
+  promoCodes       PromoCode[]
+  refundPolicy     RefundPolicy?
+  tournaments      Tournament[]
+  tournamentMatches TournamentMatch[]
+
+  @@index([city, area])
+  @@map("turfs")
+}
+
+model TurfPhoto {
+  id     String @id @default(cuid())
+  turfId String
+  turf   Turf   @relation(fields: [turfId], references: [id])
+  url    String
+
+  @@index([turfId])
+  @@map("turf_photos")
+}
+
+model MembersOnlySlot {
+  id        String @id @default(cuid())
+  turfId    String
+  turf      Turf   @relation(fields: [turfId], references: [id])
+  dayOfWeek Int // 0 = Sunday .. 6 = Saturday
+  startTime String // "06:00"
+  endTime   String // "08:00"
+
+  @@index([turfId])
+  @@map("members_only_slots")
+}
+
+model Favorite {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  turfId String
+  turf   Turf   @relation(fields: [turfId], references: [id])
+
+  @@unique([userId, turfId])
+  @@map("favorites")
+}
+
+model TurfRating {
+  id             String   @id @default(cuid())
+  turfId         String
+  turf           Turf     @relation(fields: [turfId], references: [id])
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  surfaceScore   Int
+  netScore       Int
+  lightingScore  Int
+  createdAt      DateTime @default(now())
+
+  @@unique([userId, turfId])
+  @@map("turf_ratings")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  turfId    String
+  turf      Turf     @relation(fields: [turfId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@index([turfId])
+  @@map("reviews")
+}

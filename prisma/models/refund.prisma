@@ -1,0 +1,35 @@
+model RefundPolicy {
+  id                    String   @id @default(cuid())
+  turfId                String   @unique
+  turf                  Turf     @relation(fields: [turfId], references: [id])
+  fullRefundHours       Int      @default(12)
+  partialRefundPercent  Int      @default(50)
+  noRefundHours         Int      @default(2)
+
+  @@map("refund_policies")
+}
+
+model PlatformRefundBounds {
+  id               String   @id @default(cuid())
+  minPercent       Int
+  maxPercent       Int
+  updatedByAdminId String
+  updatedByAdmin   User     @relation("RefundBoundsAdmin", fields: [updatedByAdminId], references: [id])
+  updatedAt        DateTime @default(now())
+
+  @@map("platform_refund_bounds")
+}
+
+model Cancellation {
+  id                String   @id @default(cuid())
+  bookingId         String   @unique
+  booking           Booking  @relation(fields: [bookingId], references: [id])
+  cancelledByUserId String
+  cancelledByUser   User     @relation(fields: [cancelledByUserId], references: [id])
+  reason            String?
+  refundPercent     Int
+  refundAmount      Decimal  @db.Decimal(10, 2)
+  createdAt         DateTime @default(now())
+
+  @@map("cancellations")
+}

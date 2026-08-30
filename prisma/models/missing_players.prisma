@@ -1,0 +1,39 @@
+model OpenSlot {
+  id              String         @id @default(cuid())
+  bookingId       String         @unique
+  booking         Booking        @relation(fields: [bookingId], references: [id])
+  captainId       String
+  captain         User           @relation("OpenSlotCaptain", fields: [captainId], references: [id])
+  spotsNeeded     Int
+  positionsNeeded String?
+  status          OpenSlotStatus @default(OPEN)
+  createdAt       DateTime       @default(now())
+
+  joinRequests JoinRequest[]
+
+  @@map("open_slots")
+}
+
+model JoinRequest {
+  id         String            @id @default(cuid())
+  openSlotId String
+  openSlot   OpenSlot          @relation(fields: [openSlotId], references: [id])
+  playerId   String
+  player     User              @relation(fields: [playerId], references: [id])
+  status     JoinRequestStatus @default(PENDING)
+  createdAt  DateTime          @default(now())
+
+  @@unique([openSlotId, playerId])
+  @@map("join_requests")
+}
+
+model PlayerAvailability {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  unavailableFrom DateTime
+  unavailableTo   DateTime
+
+  @@index([userId])
+  @@map("player_availabilities")
+}

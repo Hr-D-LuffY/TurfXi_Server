@@ -1,0 +1,35 @@
+model Match {
+  id               String   @id @default(cuid())
+  bookingId        String   @unique
+  booking          Booking  @relation(fields: [bookingId], references: [id])
+  teamAId          String?
+  teamA            Team?    @relation("MatchTeamA", fields: [teamAId], references: [id])
+  teamBId          String?
+  teamB            Team?    @relation("MatchTeamB", fields: [teamBId], references: [id])
+  reportedByUserId String
+  reportedByUser   User     @relation("MatchReporter", fields: [reportedByUserId], references: [id])
+  scoreA           Int?
+  scoreB           Int?
+  createdAt        DateTime @default(now())
+
+  playerStats       PlayerMatchStat[]
+  tournamentMatch    TournamentMatch?
+
+  @@map("matches")
+}
+
+model PlayerMatchStat {
+  id       String  @id @default(cuid())
+  matchId  String
+  match    Match   @relation(fields: [matchId], references: [id])
+  playerId String
+  player   User    @relation(fields: [playerId], references: [id])
+  goals    Int     @default(0)
+  assists  Int     @default(0)
+  saves    Int     @default(0)
+  rating   Float?
+  position String?
+
+  @@unique([matchId, playerId])
+  @@map("player_match_stats")
+}

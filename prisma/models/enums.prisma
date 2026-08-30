@@ -1,0 +1,78 @@
+enum Role {
+  NORMAL
+  PLAYER
+  TURF_OWNER
+  ADMIN
+}
+
+enum MembershipTier {
+  FREE
+  SILVER
+  GOLD
+}
+
+enum BookingType {
+  HOURLY
+  FULL_DAY
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum WalletTransactionType {
+  TOPUP
+  PAYMENT
+  REFUND
+  WITHDRAWAL
+}
+
+enum WalletTransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum PromoDiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum SplitBillingStatus {
+  PENDING
+  COMPLETED
+  EXPIRED
+}
+
+enum SplitShareStatus {
+  PENDING
+  PAID
+}
+
+enum OpenSlotStatus {
+  OPEN
+  FILLED
+}
+
+enum JoinRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum ConversationType {
+  DIRECT
+  BOOKING_CONTEXT
+}
+
+enum NotificationType {
+  BOOKING
+  INVITE
+  REFUND
+  MESSAGE
+  TEAM_RECRUITMENT
+  SYSTEM
+}

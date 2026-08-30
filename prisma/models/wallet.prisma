@@ -1,0 +1,26 @@
+model Wallet {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  balance   Decimal  @default(0) @db.Decimal(12, 2)
+  updatedAt DateTime @updatedAt
+
+  transactions WalletTransaction[]
+
+  @@map("wallets")
+}
+
+model WalletTransaction {
+  id            String                   @id @default(cuid())
+  walletId      String
+  wallet        Wallet                   @relation(fields: [walletId], references: [id])
+  type          WalletTransactionType
+  status        WalletTransactionStatus  @default(PENDING)
+  amount        Decimal                  @db.Decimal(12, 2)
+  referenceType String?
+  referenceId   String?
+  createdAt     DateTime                 @default(now())
+
+  @@index([walletId])
+  @@map("wallet_transactions")
+}

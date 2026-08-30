@@ -1,0 +1,57 @@
+model Booking {
+  id                String        @id @default(cuid())
+  turfId            String
+  turf              Turf          @relation(fields: [turfId], references: [id])
+  bookerId          String
+  booker            User          @relation(fields: [bookerId], references: [id])
+  bookingDate       DateTime      @db.Date
+  startTime         String
+  endTime           String
+  type              BookingType   @default(HOURLY)
+  status            BookingStatus @default(PENDING)
+  totalPrice        Decimal       @db.Decimal(10, 2)
+  advanceAmount     Decimal       @db.Decimal(10, 2)
+  isRecurring       Boolean       @default(false)
+  recurringParentId String?
+  recurringParent   Booking?      @relation("BookingRecurrence", fields: [recurringParentId], references: [id])
+  recurringChildren Booking[]     @relation("BookingRecurrence")
+  membersOnly       Boolean       @default(false)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  promoUsage      BookingPromoUsage?
+  splitBilling    SplitBilling?
+  cancellation    Cancellation?
+  openSlot        OpenSlot?
+  match           Match?
+  conversation    Conversation?
+
+  @@index([turfId, bookingDate])
+  @@map("bookings")
+}
+
+model PromoCode {
+  id             String            @id @default(cuid())
+  turfId         String?
+  turf           Turf?             @relation(fields: [turfId], references: [id])
+  code           String            @unique
+  discountType   PromoDiscountType
+  discountValue  Decimal           @db.Decimal(10, 2)
+  validFrom      DateTime
+  validTo        DateTime
+  usageLimit     Int?
+
+  usages BookingPromoUsage[]
+
+  @@map("promo_codes")
+}
+
+model BookingPromoUsage {
+  id          String    @id @default(cuid())
+  bookingId   String    @unique
+  booking     Booking   @relation(fields: [bookingId], references: [id])
+  promoCodeId String
+  promoCode   PromoCode @relation(fields: [promoCodeId], references: [id])
+
+  @@map("booking_promo_usages")
+}

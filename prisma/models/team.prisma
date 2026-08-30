@@ -1,0 +1,43 @@
+model Team {
+  id             String   @id @default(cuid())
+  name           String
+  logoUrl        String?
+  captainId      String
+  captain        User     @relation("TeamCaptain", fields: [captainId], references: [id])
+  viceCaptainId  String?
+  viceCaptain    User?    @relation("TeamViceCaptain", fields: [viceCaptainId], references: [id])
+  createdAt      DateTime @default(now())
+
+  members            TeamMember[]
+  recruitment        TeamRecruitment?
+  tournamentEntries   TournamentTeamEntry[]
+
+  matchesAsTeamA           Match[]           @relation("MatchTeamA")
+  matchesAsTeamB           Match[]           @relation("MatchTeamB")
+  tournamentMatchesAsTeamA TournamentMatch[] @relation("TournamentMatchTeamA")
+  tournamentMatchesAsTeamB TournamentMatch[] @relation("TournamentMatchTeamB")
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id       String   @id @default(cuid())
+  teamId   String
+  team     Team     @relation(fields: [teamId], references: [id])
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  joinedAt DateTime @default(now())
+
+  @@unique([teamId, userId])
+  @@map("team_members")
+}
+
+model TeamRecruitment {
+  id              String  @id @default(cuid())
+  teamId          String  @unique
+  team            Team    @relation(fields: [teamId], references: [id])
+  positionsNeeded String?
+  isOpen          Boolean @default(true)
+
+  @@map("team_recruitments")
+}

@@ -1,0 +1,61 @@
+model User {
+  id             String         @id @default(cuid())
+  email          String         @unique
+  password       String?
+  googleId       String?        @unique
+  name           String
+  role           Role           @default(NORMAL)
+  membershipTier MembershipTier @default(FREE)
+  suspended      Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  playerProfile PlayerProfile?
+  wallet        Wallet?
+
+  ownedTurfs Turf[] @relation("TurfOwner")
+
+  bookings Booking[]
+
+  favorites   Favorite[]
+  turfRatings TurfRating[]
+  reviews     Review[]
+
+  splitShares SplitShare[]
+
+  cancellations         Cancellation[]
+  refundBoundsUpdates    PlatformRefundBounds[] @relation("RefundBoundsAdmin")
+
+  captainedOpenSlots OpenSlot[]    @relation("OpenSlotCaptain")
+  joinRequests       JoinRequest[]
+  availability       PlayerAvailability[]
+
+  captainedTeams     Team[] @relation("TeamCaptain")
+  viceCaptainedTeams Team[] @relation("TeamViceCaptain")
+  teamMemberships    TeamMember[]
+
+  reportedMatches Match[]           @relation("MatchReporter")
+  matchStats      PlayerMatchStat[]
+
+  organizedTournaments Tournament[]
+
+  notifications Notification[]
+
+  conversationParticipation ConversationParticipant[]
+  messages                  Message[]
+
+  @@map("users")
+}
+
+model PlayerProfile {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id])
+  position       String?
+  preferredFoot  String?
+  city           String?
+  area           String?
+  skillLevel     String?
+
+  @@map("player_profiles")
+}

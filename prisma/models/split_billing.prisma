@@ -1,0 +1,30 @@
+model SplitBilling {
+  id             String             @id @default(cuid())
+  bookingId      String             @unique
+  booking        Booking            @relation(fields: [bookingId], references: [id])
+  totalAmount    Decimal            @db.Decimal(10, 2)
+  status         SplitBillingStatus @default(PENDING)
+  // The booking slot is held while shares are unpaid; after this timestamp
+  // the hold-release background job auto-cancels/refunds (see backend
+  // src/jobs — this is the BullMQ job that reads this field).
+  holdExpiresAt  DateTime
+  createdAt      DateTime           @default(now())
+
+  shares SplitShare[]
+
+  @@map("split_billings")
+}
+
+model SplitShare {
+  id             String           @id @default(cuid())
+  splitBillingId String
+  splitBilling   SplitBilling     @relation(fields: [splitBillingId], references: [id])
+  userId         String
+  user           User             @relation(fields: [userId], references: [id])
+  amount         Decimal          @db.Decimal(10, 2)
+  status         SplitShareStatus @default(PENDING)
+  paidAt         DateTime?
+
+  @@unique([splitBillingId, userId])
+  @@map("split_shares")
+}
