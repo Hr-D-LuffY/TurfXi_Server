@@ -15,15 +15,35 @@ export function initSocket(httpServer: HttpServer) {
   });
 
   if (env.REDIS_URL) {
-    try {
-      const pubClient = new Redis(env.REDIS_URL, { lazyConnect: true });
-      const subClient = pubClient.duplicate();
-      pubClient.on('error', (err) => logger.warn('Socket.io Redis pub client error:', err.message));
-      subClient.on('error', (err) => logger.warn('Socket.io Redis sub client error:', err.message));
-      io.adapter(createAdapter(pubClient, subClient));
-    } catch (err: any) {
-      logger.warn('Redis adapter initialization skipped or failed:', err.message);
-    }
+    let redisAttempted = false;
+    const pubClient = new Redis(env.REDIS_URL, {
+      maxRetriesPerRequest: null,
+      enableOfflineQueue: false,
+      retryStrategy: (times) => (times > 2 ? null : 1000),
+    });
+
+    pubClient.on('error', (err) => {
+      if (!redisAttempted) {
+        redisAttempted = true;
+        logger.warn(
+          `Redis not reachable at ${env.REDIS_URL}. Falling back to default in-memory Socket.io adapter.`
+        );
+      }
+      pubClient.disconnect();
+    });
+
+    pubClient.on('connect', () => {
+      try {
+        const subClient = pubClient.duplicate();
+        subClient.on('error', (err) =>
+          logger.warn('Socket.io Redis sub client error:', err.message)
+        );
+        io.adapter(createAdapter(pubClient, subClient));
+        logger.info('Socket.io Redis adapter connected successfully');
+      } catch (err: any) {
+        logger.warn('Failed to bind Redis adapter:', err.message);
+      }
+    });
   }
 
   // Socket authentication handshake
