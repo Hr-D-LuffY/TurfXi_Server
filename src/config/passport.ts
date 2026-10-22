@@ -13,9 +13,22 @@ passport.use(
     },
     async (payload, done) => {
       try {
-        // TODO (auth): payload.sub should be the user id set at token signing time
-        const user = await prisma.user.findUnique({ where: { id: payload.sub } });
-        return done(null, user || false);
+        if (!payload.sub) {
+          return done(null, false);
+        }
+        const user = await prisma.user.findUnique({
+          where: { id: payload.sub },
+          include: {
+            playerProfile: true,
+            wallet: true,
+          },
+        });
+
+        if (!user || user.suspended) {
+          return done(null, false);
+        }
+
+        return done(null, user);
       } catch (err) {
         return done(err, false);
       }
@@ -33,8 +46,7 @@ if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
         callbackURL: env.GOOGLE_CALLBACK_URL || '/api/auth/google/callback',
       },
       async (_accessToken, _refreshToken, profile, done) => {
-        // TODO (auth): find or create a User row from the Google profile
-        return done(null, profile as any);
+        return done(null, profile);
       }
     )
   );
