@@ -4,6 +4,19 @@ import passport from 'passport';
 // Protects a route — requires a valid JWT access token
 export const requireAuth = passport.authenticate('jwt', { session: false });
 
+// Optional auth — extracts user if Bearer token is present, continues as guest if not
+export const optionalAuth = (req: Request, res: Response, next: NextFunction) => {
+  passport.authenticate('jwt', { session: false }, (err: any, user: any) => {
+    if (err) {
+      return next(err);
+    }
+    if (user) {
+      req.user = user;
+    }
+    next();
+  })(req, res, next);
+};
+
 // Restricts a route to specific roles, e.g. requireRole('ADMIN', 'TURF_OWNER')
 export function requireRole(...roles: string[]) {
   return (req: Request, res: Response, next: NextFunction) => {
